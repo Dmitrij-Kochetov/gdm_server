@@ -1,4 +1,4 @@
-module gdm_server
+module github.com/Dmitrij-Kochetov/gdm_server
 
 go 1.21
 
