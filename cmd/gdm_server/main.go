@@ -1,20 +1,40 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-git/go-git/v5"
-	"log"
+	"context"
+	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/config"
+	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/database/sqlite"
+	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/logs"
+	"log/slog"
 	"os"
 )
 
 func main() {
-	res, err := git.PlainClone("some_prj", false, &git.CloneOptions{
-		URL:      "https://gitlab.com/ImpError/httpserv",
-		Progress: os.Stdout,
-	})
+	cfg := config.LoadConfig()
+	logger := logs.SetUpLogger(cfg.Env)
+
+	logger = logger.With(slog.String("env", cfg.Env))
+	logger.Info("Initializing server on:", slog.String("address", cfg.Address))
+	logger.Debug("Debug mode enabled...")
+
+	storage, err := sqlite.NewStorage(cfg.StoragePath)
 	if err != nil {
-		log.Printf("[!] Error: %v", err)
+		logger.Error("Storage initializing failed", logs.Err(err))
+		os.Exit(1)
+	}
+	defer func(storage *sqlite.Storage, ctx context.Context) {
+		err := storage.Close(ctx)
+		if err != nil {
+			logger.Error("Storage closing failed", logs.Err(err))
+		}
+	}(storage, context.Background())
+
+	if err := storage.RunMigrations(); err != nil {
+		logger.Error("Migrations failed", logs.Err(err))
+		os.Exit(1)
 	}
 
-	fmt.Printf("%v", res)
+	//TODO: Init server: go-chi maybe
+
+	//TODO: Run server
 }
