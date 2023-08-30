@@ -1,10 +1,14 @@
 package repository
 
 import (
-	"context"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/project"
+	"github.com/google/uuid"
 )
 
-type ProjectRepository interface {
-	Get(context.Context, int) (project.Project, error)
+type IProject interface {
+	GetByID(uuid.UUID) (project.Project, error)
+	GetByContainerName(string) (project.Project, error)
+	CreateProject(project.Project) error
+	UpdateProject(project.Project) error
+	DeleteById(uuid.UUID) error
 }
