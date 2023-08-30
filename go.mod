@@ -12,6 +12,8 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/go-chi/chi/v5 v5.0.10 // indirect
+	github.com/google/uuid v1.3.1 // indirect
+	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
