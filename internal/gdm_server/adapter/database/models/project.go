@@ -20,7 +20,7 @@ type Projects struct {
 
 func (r Project) ConvertToDomain() (project.Project, error) {
 
-	converted, err := uuid.FromBytes(r.ID)
+	converted, err := uuid.Parse(string(r.ID))
 	if err != nil {
 		return project.Project{}, err
 	}

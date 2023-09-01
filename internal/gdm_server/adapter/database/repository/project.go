@@ -11,7 +11,7 @@ type ProjectRepository struct {
 	storage *sqlite.Storage
 }
 
-func New(storage *sqlite.Storage) *ProjectRepository {
+func NewProjectRepo(storage *sqlite.Storage) *ProjectRepository {
 	return &ProjectRepository{
 		storage: storage,
 	}
@@ -34,7 +34,7 @@ func (p *ProjectRepository) GetByContainerName(name string) (project.Project, er
 	defer p.storage.RUnlock()
 
 	var proj models.Project
-	if err := p.storage.DB.Get(`SELECT * FROM "projects" WHERE container_name=$1`, name); err != nil {
+	if err := p.storage.DB.Get(&proj, `SELECT * FROM "projects" WHERE container_name=$1`, name); err != nil {
 		return project.Project{}, err
 	}
 
