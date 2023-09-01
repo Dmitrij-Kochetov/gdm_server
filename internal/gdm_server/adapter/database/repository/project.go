@@ -4,6 +4,7 @@ import (
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/database/models"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/database/sqlite"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/project"
+	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/project/repository"
 	"github.com/google/uuid"
 )
 
@@ -38,6 +39,22 @@ func (p *ProjectRepository) GetByContainerName(name string) (project.Project, er
 		return project.Project{}, err
 	}
 
+	return proj.ConvertToDomain()
+}
+
+func (p *ProjectRepository) GetProjects(filter repository.Filter) (project.Projects, error) {
+	p.storage.RLock()
+	defer p.storage.RUnlock()
+
+	var proj models.Projects
+	if err := p.storage.DB.Get(&proj,
+		`SELECT * FROM projects 
+         	WHERE deleted=$1
+         	ORDER BY ID
+         	LIMIT $2 OFFSET $3`,
+		filter.Deleted, filter.Limit, filter.Offset); err != nil {
+		return project.Projects{}, err
+	}
 	return proj.ConvertToDomain()
 }
 

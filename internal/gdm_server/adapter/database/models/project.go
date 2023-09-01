@@ -5,6 +5,20 @@ import (
 	"github.com/google/uuid"
 )
 
+type Projects []Project
+
+func (p Projects) ConvertToDomain() (project.Projects, error) {
+	proj := project.Projects{}
+	for _, val := range p {
+		val, err := val.ConvertToDomain()
+		if err != nil {
+			return project.Projects{}, err
+		}
+		proj = append(proj, val)
+	}
+	return proj, nil
+}
+
 type Project struct {
 	ID            []byte `db:"ID"`
 	Link          string `db:"link"`
@@ -12,10 +26,6 @@ type Project struct {
 	UpToDate      bool   `db:"up_to_date"`
 	Running       bool   `db:"running"`
 	Deleted       bool   `db:"deleted"`
-}
-
-type Projects struct {
-	Projects []Project
 }
 
 func (r Project) ConvertToDomain() (project.Project, error) {
