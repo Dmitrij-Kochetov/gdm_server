@@ -29,18 +29,20 @@ func GetProjectsByFilter(repo repository.IProjectRepo, filter repository.Filter)
 	return res, err
 }
 
-func CreateProject(repo repository.IProjectRepo, proj dto.Project) error {
-	if err := repo.CreateProject(proj); err != nil {
-		return err
+func CreateProject(repo repository.IProjectRepo, proj dto.Project) (dto.Project, error) {
+	created, err := repo.CreateProject(proj)
+	if err != nil {
+		return dto.Project{}, err
 	}
-	return nil
+	return created, nil
 }
 
-func UpdateProject(repo repository.IProjectRepo, proj dto.Project) error {
-	if err := repo.UpdateProject(proj); err != nil {
-		return err
+func UpdateProject(repo repository.IProjectRepo, proj dto.Project) (dto.Project, error) {
+	updated, err := repo.UpdateProject(proj)
+	if err != nil {
+		return dto.Project{}, err
 	}
-	return nil
+	return updated, nil
 }
 
 func DeleteByID(repo repository.IProjectRepo, id int) error {

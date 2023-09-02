@@ -57,13 +57,13 @@ func (p *ProjectRepository) GetProjects(filter repository.Filter) (dto.Projects,
 	return proj.ConvertToDomain(), nil
 }
 
-func (p *ProjectRepository) CreateProject(proj dto.CreateProject) error {
+func (p *ProjectRepository) CreateProject(proj dto.CreateProject) (dto.Project, error) {
 	p.storage.Lock()
 	defer p.storage.Unlock()
 
 	tx, err := p.storage.DB.Begin()
 	if err != nil {
-		return err
+		return dto.Project{}, err
 	}
 
 	_, err = tx.Exec(
@@ -76,24 +76,24 @@ func (p *ProjectRepository) CreateProject(proj dto.CreateProject) error {
 		proj.Deleted,
 	)
 	if err != nil {
-		return err
+		return dto.Project{}, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return err
+		return dto.Project{}, err
 	}
 
-	return nil
+	return p.getLatest()
 }
 
-func (p *ProjectRepository) UpdateProject(proj dto.Project) error {
+func (p *ProjectRepository) UpdateProject(proj dto.Project) (dto.Project, error) {
 	p.storage.Lock()
 	defer p.storage.Unlock()
 
 	tx, err := p.storage.DB.Begin()
 	if err != nil {
-		return err
+		return dto.Project{}, err
 	}
 
 	_, err = tx.Exec(
@@ -108,14 +108,20 @@ func (p *ProjectRepository) UpdateProject(proj dto.Project) error {
 		proj.ID,
 	)
 	if err != nil {
-		return err
+		return dto.Project{}, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return err
+		return dto.Project{}, err
 	}
-	return nil
+
+	proj, err = p.GetByID(proj.ID)
+	if err != nil {
+		return dto.Project{}, err
+	}
+
+	return proj, nil
 }
 
 func (p *ProjectRepository) DeleteByID(id int) error {
