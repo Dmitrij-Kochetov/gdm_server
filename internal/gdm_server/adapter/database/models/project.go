@@ -1,46 +1,25 @@
 package models
 
 import (
-	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/project"
-	"github.com/google/uuid"
+	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/dto"
 )
 
 type Projects []Project
 
-func (p Projects) ConvertToDomain() (project.Projects, error) {
-	proj := project.Projects{}
+func (p Projects) ConvertToDomain() dto.Projects {
+	proj := dto.Projects{}
 	for _, val := range p {
-		val, err := val.ConvertToDomain()
-		if err != nil {
-			return project.Projects{}, err
-		}
+		val := dto.Project(val)
 		proj = append(proj, val)
 	}
-	return proj, nil
+	return proj
 }
 
 type Project struct {
-	ID            []byte `db:"ID"`
+	ID            int    `db:"ID"`
 	Link          string `db:"link"`
 	ContainerName string `db:"container_name"`
 	UpToDate      bool   `db:"up_to_date"`
 	Running       bool   `db:"running"`
 	Deleted       bool   `db:"deleted"`
-}
-
-func (r Project) ConvertToDomain() (project.Project, error) {
-
-	converted, err := uuid.Parse(string(r.ID))
-	if err != nil {
-		return project.Project{}, err
-	}
-
-	return project.Project{
-		ID:            converted,
-		Link:          r.Link,
-		ContainerName: r.ContainerName,
-		UpToDate:      r.UpToDate,
-		Running:       r.Running,
-		Deleted:       r.Deleted,
-	}, nil
 }

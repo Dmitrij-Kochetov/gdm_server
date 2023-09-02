@@ -3,9 +3,8 @@ package repository
 import (
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/database/models"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/database/sqlite"
-	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/project"
-	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/project/repository"
-	"github.com/google/uuid"
+	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/dto"
+	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/repository"
 )
 
 type ProjectRepository struct {
@@ -18,47 +17,47 @@ func NewProjectRepo(storage *sqlite.Storage) *ProjectRepository {
 	}
 }
 
-func (p *ProjectRepository) GetByID(id uuid.UUID) (project.Project, error) {
+func (p *ProjectRepository) GetByID(id int) (dto.Project, error) {
 	p.storage.RLock()
 	defer p.storage.RUnlock()
 
 	var proj models.Project
 	if err := p.storage.DB.Get(&proj, `SELECT * FROM "projects" WHERE ID=$1`, id); err != nil {
-		return project.Project{}, err
+		return dto.Project{}, err
 	}
 
-	return proj.ConvertToDomain()
+	return dto.Project(proj), nil
 }
 
-func (p *ProjectRepository) GetByContainerName(name string) (project.Project, error) {
+func (p *ProjectRepository) GetByContainerName(name string) (dto.Project, error) {
 	p.storage.RLock()
 	defer p.storage.RUnlock()
 
 	var proj models.Project
 	if err := p.storage.DB.Get(&proj, `SELECT * FROM "projects" WHERE container_name=$1`, name); err != nil {
-		return project.Project{}, err
+		return dto.Project{}, err
 	}
 
-	return proj.ConvertToDomain()
+	return dto.Project(proj), nil
 }
 
-func (p *ProjectRepository) GetProjects(filter repository.Filter) (project.Projects, error) {
+func (p *ProjectRepository) GetProjects(filter repository.Filter) (dto.Projects, error) {
 	p.storage.RLock()
 	defer p.storage.RUnlock()
 
 	var proj models.Projects
-	if err := p.storage.DB.Get(&proj,
+	if err := p.storage.DB.Select(&proj,
 		`SELECT * FROM projects 
          	WHERE deleted=$1
          	ORDER BY ID
          	LIMIT $2 OFFSET $3`,
 		filter.Deleted, filter.Limit, filter.Offset); err != nil {
-		return project.Projects{}, err
+		return dto.Projects{}, err
 	}
-	return proj.ConvertToDomain()
+	return proj.ConvertToDomain(), nil
 }
 
-func (p *ProjectRepository) CreateProject(proj project.Project) error {
+func (p *ProjectRepository) CreateProject(proj dto.CreateProject) error {
 	p.storage.Lock()
 	defer p.storage.Unlock()
 
@@ -68,9 +67,8 @@ func (p *ProjectRepository) CreateProject(proj project.Project) error {
 	}
 
 	_, err = tx.Exec(
-		`INSERT INTO "projects" (ID, link, container_name, up_to_date, running, deleted)
-			VALUES ($1, $2, $3, $4, $5, $6)`,
-		proj.ID,
+		`INSERT INTO "projects" (link, container_name, up_to_date, running, deleted)
+			VALUES ($1, $2, $3, $4, $5)`,
 		proj.Link,
 		proj.ContainerName,
 		proj.UpToDate,
@@ -85,10 +83,11 @@ func (p *ProjectRepository) CreateProject(proj project.Project) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func (p *ProjectRepository) UpdateProject(proj project.Project) error {
+func (p *ProjectRepository) UpdateProject(proj dto.Project) error {
 	p.storage.Lock()
 	defer p.storage.Unlock()
 
@@ -119,7 +118,7 @@ func (p *ProjectRepository) UpdateProject(proj project.Project) error {
 	return nil
 }
 
-func (p *ProjectRepository) DeleteProject(id uuid.UUID) error {
+func (p *ProjectRepository) DeleteByID(id int) error {
 	p.storage.Lock()
 	defer p.storage.Unlock()
 
@@ -138,4 +137,16 @@ func (p *ProjectRepository) DeleteProject(id uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+func (p *ProjectRepository) getLatest() (dto.Project, error) {
+	p.storage.RLock()
+	defer p.storage.RUnlock()
+
+	var proj models.Project
+	if err := p.storage.DB.Get(&proj, `SELECT * FROM "projects" ORDER BY ID DESC LIMIT 1`); err != nil {
+		return dto.Project{}, err
+	}
+
+	return dto.Project(proj), nil
 }
