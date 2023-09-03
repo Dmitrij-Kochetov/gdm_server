@@ -1,1 +1,3 @@
+DROP TABLE IF EXISTS versions;
+DROP TABLE IF EXISTS project_info;
 DROP TABLE IF EXISTS projects;
