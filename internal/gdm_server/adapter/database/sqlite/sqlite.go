@@ -63,6 +63,9 @@ func (s *Storage) RunMigrations() error {
 	})
 
 	d, err := bindata.WithInstance(res)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
 	m, err := migrate.NewWithInstance("go-bindata", d, "sqlite3", driver)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
