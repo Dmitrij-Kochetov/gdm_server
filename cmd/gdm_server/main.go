@@ -4,7 +4,10 @@ import (
 	"context"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/config"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/database/sqlite"
+	logger2 "github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/http-server/middleware/logger"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/logs"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
 	"log/slog"
 	"os"
 )
@@ -35,6 +38,9 @@ func main() {
 	}
 
 	//TODO: Init server: go-chi maybe
-
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(logger2.New(logger))
+	router.Use(middleware.Recoverer)
 	//TODO: Run server
 }
