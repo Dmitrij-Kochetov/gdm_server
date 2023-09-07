@@ -16,10 +16,10 @@ func (p Projects) ConvertToDomain() dto.Projects {
 }
 
 type Project struct {
-	ID            int    `db:"ID"`
+	ID            int    `db:"project_id"`
 	Link          string `db:"link"`
 	ContainerName string `db:"container_name"`
+	Description   string `db:"description"`
 	UpToDate      bool   `db:"up_to_date"`
-	Running       bool   `db:"running"`
 	Deleted       bool   `db:"deleted"`
 }

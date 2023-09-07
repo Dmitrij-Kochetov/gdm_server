@@ -14,7 +14,7 @@ type IProjectRepo interface {
 	GetByID(int) (dto.Project, error)
 	GetByContainerName(string) (dto.Project, error)
 	GetProjects(Filter) (dto.Projects, error)
-	CreateProject(dto.Project) (dto.Project, error)
+	CreateProject(dto.CreateProject) (dto.Project, error)
 	UpdateProject(dto.Project) (dto.Project, error)
 	DeleteByID(int) error
 	getLatest() (dto.Project, error)
