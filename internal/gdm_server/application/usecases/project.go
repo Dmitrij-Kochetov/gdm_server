@@ -29,7 +29,7 @@ func GetProjectsByFilter(repo repository.IProjectRepo, filter repository.Filter)
 	return res, err
 }
 
-func CreateProject(repo repository.IProjectRepo, proj dto.Project) (dto.Project, error) {
+func CreateProject(repo repository.IProjectRepo, proj dto.CreateProject) (dto.Project, error) {
 	created, err := repo.CreateProject(proj)
 	if err != nil {
 		return dto.Project{}, err
