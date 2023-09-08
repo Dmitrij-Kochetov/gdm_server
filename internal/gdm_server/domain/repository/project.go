@@ -17,5 +17,5 @@ type IProjectRepo interface {
 	CreateProject(dto.CreateProject) (dto.Project, error)
 	UpdateProject(dto.Project) (dto.Project, error)
 	DeleteByID(int) error
-	getLatest() (dto.Project, error)
+	GetLatest() (dto.Project, error)
 }
