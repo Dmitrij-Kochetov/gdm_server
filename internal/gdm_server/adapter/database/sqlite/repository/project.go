@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"context"
-	"fmt"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/adapter/database/models"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/dto"
 	"github.com/Dmitrij-Kochetov/gdm_server/internal/gdm_server/domain/repository"
@@ -13,28 +11,8 @@ type ProjectRepository struct {
 	db *sqlx.DB
 }
 
-func NewProjectRepo(path string) (*ProjectRepository, error) {
-	const op = "adapter.database.sqlite.repository.project"
-
-	db, err := sqlx.Open("sqlite3", path)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	err = db.Ping()
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	return &ProjectRepository{db: db}, nil
-}
-
-func (p *ProjectRepository) Close(ctx context.Context) error {
-	const op = "adapter.database.sqlite.Close"
-	if err := p.db.Close(); err != nil {
-		return fmt.Errorf("%s: %w", op, err)
-	}
-	return nil
+func NewProjectRepo(db *sqlx.DB) *ProjectRepository {
+	return &ProjectRepository{db: db}
 }
 
 func (p *ProjectRepository) GetByID(id int) (dto.Project, error) {
@@ -92,7 +70,7 @@ func (p *ProjectRepository) CreateProject(proj dto.CreateProject) (dto.Project, 
 		return dto.Project{}, err
 	}
 
-	return p.getLatest()
+	return p.GetLatest()
 }
 
 func (p *ProjectRepository) UpdateProject(proj dto.Project) (dto.Project, error) {
@@ -147,7 +125,7 @@ func (p *ProjectRepository) DeleteByID(id int) error {
 	return nil
 }
 
-func (p *ProjectRepository) getLatest() (dto.Project, error) {
+func (p *ProjectRepository) GetLatest() (dto.Project, error) {
 	var proj models.Project
 	if err := p.db.Get(&proj, `SELECT * FROM "projects" ORDER BY project_id DESC LIMIT 1`); err != nil {
 		return dto.Project{}, err
